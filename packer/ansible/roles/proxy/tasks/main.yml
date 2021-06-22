@@ -1,0 +1,22 @@
+---
+- name: AWSLogs設定ファイルを差し替えます
+  copy:
+    src: "../files/etc/awslogs/awslogs.conf"
+    dest: /etc/awslogs/awslogs.conf
+    mode: 0644
+- name: AWSLogsを再起動します
+  systemd:
+    name: awslogsd
+    state: restarted
+- name: Ghettoforgeリポジトリの追加します
+  yum:
+    name: http://mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el7.noarch.rpm
+- name: Dante serverのインストールをします
+  yum:
+    name: dante-server
+    enablerepo: gf-plus
+- name: socked.confを配置します
+  copy:
+    src: "../files/etc/sockd.conf"
+    dest: /etc/sockd.conf
+    mode: 0644

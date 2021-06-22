@@ -1,0 +1,187 @@
+---
+- name: ロケールを日本に変更します(cloud.cfg)
+  lineinfile:
+    dest: /etc/cloud/cloud.cfg
+    line: "locale: ja_JP.UTF-8"
+- name: ロケールを日本に変更します
+  command: localectl set-locale LANG=ja_JP.UTF-8
+- name: タイムゾーンをJSTに変更します
+  command: timedatectl set-timezone Asia/Tokyo
+- name: ローカルタイムを変更します
+  file:
+    src: /usr/share/zoneinfo/Asia/Tokyo
+    dest: /etc/localtime
+    state: link
+    force: yes
+- name: nproc の soft limit を設定します
+  pam_limits:
+    domain: "*"
+    limit_type: soft
+    limit_item: nproc
+    value: 65536
+- name: nproc の hard limit を設定します
+  pam_limits:
+    domain: "*"
+    limit_type: hard
+    limit_item: nproc
+    value: 65536
+- name: nofile の soft limit を設定します
+  pam_limits:
+    domain: "*"
+    limit_type: soft
+    limit_item: nofile
+    value: 65536
+- name: nofile の hard limit を設定します
+  pam_limits:
+    domain: "*"
+    limit_type: hard
+    limit_item: nofile
+    value: 65536
+- name: sysctl.conf を設定します
+  copy:
+    src: "../files/etc/sysctl.conf"
+    dest: "/etc/."
+    mode: 0644
+- name: sysctl.conf を反映します
+  command: /sbin/sysctl -p
+- name: yum fastestmirrorを無効化します
+  lineinfile:
+    dest: /etc/yum/pluginconf.d/fastestmirror.conf
+    owner: root
+    group: root
+    mode: 0644
+    state: present
+    regexp: "^#?enabled="
+    insertafter: EOF
+    create: yes
+    line: "enabled=0"
+- name: yum updateします
+  yum:
+    name: "*"
+    state: latest
+- name: epel-releaseをダウンロードします
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+- name: bind-utils(nslookup/dig)をインストールします
+  yum:
+    name: bind-utils
+- name: yum cacheを削除します(jqインストールでエラーになるときがあるため実施)
+  command: yum clean all
+  args:
+    warn: false
+- name: jqをインストールします
+  yum:
+    name: jq
+    enablerepo: epel
+- name: tcpdumpをインストールします
+  yum:
+    name: tcpdump
+- name: gitをインストールします
+  yum:
+    name: git
+- name: auditlog を設定します
+  copy:
+    src: "../files/etc/audit/rules.d/audit.rules"
+    dest: "/etc/audit/rules.d/."
+    mode: 0640
+- name: auditlogのdaemonを設定します
+  copy:
+    src: "../files/etc/audit/auditd.conf"
+    dest: "/etc/audit/."
+    mode: 0640
+- name: auditlogを再起動します
+  command: service auditd restart
+  args:
+    warn: false
+- name: Bashセッションのタイムアウトを設定します
+  copy:
+    src: "../files/etc/profile.d/bash_timeout.sh"
+    dest: "/etc/profile.d/."
+    mode: 0644
+- name: ntpをアンインストールします
+  yum:
+    name: ntp
+    state: absent
+- name: chronyをインストールします
+  yum:
+    name: chrony
+    state: present
+- name: NTPの同期先を指定します
+  copy:
+    src: "../files/etc/chrony.conf"
+    dest: "/etc/."
+    mode: 0644
+- name: chronyを有効化します
+  systemd:
+    name: chronyd
+    enabled: yes
+- name: SSHの設定ファイルを更新します
+  copy:
+    src: "../files/etc/ssh/sshd_config"
+    dest: "/etc/ssh/."
+    mode: 0644
+- name: AWSLogsをインストールします
+  yum:
+    name: awslogs
+    state: present
+- name: AWSCli設定ファイルをコピーします
+  copy:
+    src: "../files/etc/awslogs/awscli.conf"
+    dest: "/etc/awslogs/."
+    mode: 0644
+- name: AWSLogsのstateディレクトリを作成します
+  file:
+    dest: "/var/awslogs/state/"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+- name: AWSLogsを有効化します
+  systemd:
+    name: awslogsd
+    enabled: yes
+- name: logrotate cronの設定ファイルをコピーします
+  copy:
+    src: "../files/etc/logrotate.d/cron"
+    dest: "/etc/logrotate.d/."
+    mode: 0644
+- name: logrotate messagesの設定ファイルをコピーします
+  copy:
+    src: "../files/etc/logrotate.d/messages"
+    dest: "/etc/logrotate.d/."
+    mode: 0644
+- name: logrotate secureの設定ファイルをコピーします
+  copy:
+    src: "../files/etc/logrotate.d/secure"
+    dest: "/etc/logrotate.d/."
+    mode: 0644
+- name: logrotate syslogの設定ファイルをコピーします
+  copy:
+    src: "../files/etc/logrotate.d/syslog"
+    dest: "/etc/logrotate.d/."
+    mode: 0644
+- name: logrotate awslogsの設定ファイルをコピーします
+  copy:
+    src: "../files/etc/logrotate.d/awslogs"
+    dest: "/etc/logrotate.d/."
+    mode: 0644
+- name: logrotate chronyの設定ファイルをコピーします
+  copy:
+    src: "../files/etc/logrotate.d/chrony"
+    dest: "/etc/logrotate.d/."
+    mode: 0644
+- name: logrotate cloud-initの設定ファイルをコピーします
+  copy:
+    src: "../files/etc/logrotate.d/cloud-init"
+    dest: "/etc/logrotate.d/."
+    mode: 0644
+- name: logrotateの設定を反映します
+  command: /usr/sbin/logrotate /etc/logrotate.conf
+- name: logrotateの実行を１時間毎に変更します
+  command: mv /etc/cron.daily/logrotate /etc/cron.hourly/.
+- name: cloud.cfgのupdate_hostnameをコメントアウトします
+  lineinfile:
+    dest: "/etc/cloud/cloud.cfg"
+    regexp: "^ - update_hostname$"
+    line: "# - update_hostname"

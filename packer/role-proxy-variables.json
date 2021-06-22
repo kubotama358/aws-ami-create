@@ -1,0 +1,6 @@
+{
+    "packer_tag_prefix":  "Proxy-AMI",
+    "instance_tag_prefix": "PROXY_OPTIMIZED",
+    "aws_source_ami": "ami-0f27d081df46f326c",
+    "provision_target": "proxy"
+}
