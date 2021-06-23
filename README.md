@@ -1,4 +1,7 @@
 # aws-ami-create
+```
+・sock5プロキシ用のamiを作成する
+```
 
 ## Preconditions
 * Install [Homebrew](https://brew.sh/index_ja.html)
