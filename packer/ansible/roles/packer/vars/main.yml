@@ -1,0 +1,9 @@
+---
+python_ver: 3.9.6
+dependence:
+  - pacage_name: gcc
+  - pacage_name: zlib-devel
+  - pacage_name: openssl-devel
+  - pacage_name: libffi-devel
+  - pacage_name: readline-devel
+  - pacage_name: libpcap-devel

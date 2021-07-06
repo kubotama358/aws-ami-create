@@ -1,0 +1,29 @@
+---
+- name: 依存パッケージをインストールします
+  yum:
+    name: "{{ item.pacage_name }}"
+    state: latest
+  with_items: "{{ dependence }}"
+- name: python3.9を取得します
+  get_url:
+    url: https://www.python.org/ftp/python/{{ python_ver }}/Python-{{ python_ver }}.tgz
+    dest: /tmp/
+- name: python3.9を解凍します
+  command: tar -xvzf Python-{{ python_ver }}.tgz
+  args:
+    chdir: /tmp/
+- name: python3.9のMakefileを生成します
+  command: ./configure --prefix=/usr/local
+  args:
+    chdir: /tmp/Python-{{ python_ver }}/
+- name: python3.9をインストールします
+  command: make altinstall
+  args:
+    chdir: /tmp/Python-{{ python_ver }}/
+- name: pipをインストールします
+  yum:
+    name: python-pip
+- name: python3.9のシンボリックリンクを貼ります
+  command: ln -s /usr/local/bin/python{{ python_ver }} /usr/local/bin/python3
+- name: pip3.9のシンボリックリンクを貼ります
+  command: ln -s /usr/local/bin/pip{{ python_ver }} /usr/local/bin/pip3

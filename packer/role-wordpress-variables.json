@@ -1,0 +1,6 @@
+{
+    "packer_tag_prefix":  "Wordpress-AMI",
+    "instance_tag_prefix": "WORDPRESS_OPTIMIZED",
+    "aws_source_ami": "ami-0f27d081df46f326c",
+    "provision_target": "wordpress"
+}

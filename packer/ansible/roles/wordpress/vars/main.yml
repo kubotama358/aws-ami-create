@@ -1,0 +1,20 @@
+---
+php_version: 8.0.3
+python_version: 3.9.6
+yum_packages:
+  - name: php.x86_64
+  - name: php-gd.x86_64
+  - name: php-mbstring.x86_64
+  - name: mysql-community-devel*
+  - name: mysql-community-server*
+  - name: MySQL-python
+archive_url: https://ja.wordpress.org/wordpress-5.7.2-ja.tar.gz
+install_path: /opt
+mysql_user:
+  name: wordpress-user
+  password: wordpress
+mysql_db:
+  db_name: wordpress
+mysql:
+  root:
+    password: Admin0000!
